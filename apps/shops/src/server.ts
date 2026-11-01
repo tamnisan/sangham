@@ -80,6 +80,29 @@ app.get("/", (_req, res) => {
   res.send(homePage(SHOPS));
 });
 
+// The shop list agents browse. Exact prices come from each shop's 402 invoice.
+app.get("/shops", async (_req, res) => {
+  const listings = await Promise.all(
+    SHOPS.map(async (shop) => {
+      const merchant = await resolveMerchant(shop.ensName).catch(() => null);
+      if (!merchant) return null;
+      return {
+        slug: shop.slug,
+        ensName: shop.ensName,
+        title: shop.title,
+        sells: shop.sells,
+        orderHelp: shop.orderHelp,
+        example: shop.example,
+        listedPriceInr: merchant.priceInrPaise / 100,
+        payTo: merchant.hederaPayTo,
+        buyUrl: merchant.endpoint,
+        ...shop.extras?.(),
+      };
+    }),
+  );
+  res.json(listings.filter(Boolean));
+});
+
 for (const shop of SHOPS) {
   app.get(`/${shop.slug}`, async (req, res) => {
     let quote: PageQuote;

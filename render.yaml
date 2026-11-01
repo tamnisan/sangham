@@ -34,6 +34,8 @@ services:
         sync: false
       - key: HCS_TOPIC_ID # receipts topic
         value: "0.0.11262562"
+      - key: SIGNUP_ENABLED # POST /signup opens testnet accounts for sangam-mcp users
+        value: "true"
       - key: OG_MOCK
         value: "true"
       - key: PSP_MODE

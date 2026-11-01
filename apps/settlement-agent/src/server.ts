@@ -3,6 +3,7 @@ import { z } from "zod";
 import { env, envOr, flag, inrPerUsd, paiseToUsdcAtomic, resolveMerchant } from "@sangam/shared";
 import { ogBalance } from "./decide.ts";
 import { DuplicateSettlementError, acceptNotice } from "./pipeline.ts";
+import { SignupRefused, signup } from "./signup.ts";
 import { listSettlements } from "./store.ts";
 
 const NoticeSchema = z.object({
@@ -14,6 +15,7 @@ const NoticeSchema = z.object({
 
 const sharedSecret = env("SETTLEMENT_SHARED_SECRET");
 const app = express();
+app.set("trust proxy", 1); // behind Render's proxy, so req.ip is the caller and not the proxy
 app.use(express.json());
 
 // The dashboard runs on another port (another origin once deployed). Its JSON
@@ -62,6 +64,29 @@ if (flag("SKIP_CHAIN_VERIFY")) {
         usdcAmount: atomic.toString(),
       }),
     );
+  });
+}
+
+// Opens testnet accounts for sangam-mcp users, paid for by the operator account.
+if (flag("SIGNUP_ENABLED")) {
+  const SignupSchema = z.object({ publicKey: z.string().min(1) });
+
+  app.post("/signup", async (req, res) => {
+    const body = SignupSchema.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: "send { publicKey }" });
+      return;
+    }
+    try {
+      res.json(await signup(body.data.publicKey, req.ip ?? "unknown"));
+    } catch (err) {
+      if (err instanceof SignupRefused) {
+        res.status(err.status).json({ error: err.message });
+        return;
+      }
+      console.error(`[signup] failed: ${(err as Error).message}`);
+      res.status(502).json({ error: "Sign-up failed. Try again in a minute." });
+    }
   });
 }
 

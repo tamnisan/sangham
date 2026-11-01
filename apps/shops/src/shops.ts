@@ -25,6 +25,8 @@ export type Shop = {
   buyPath: string;
   /** Example query for the paid route, e.g. "id=2". */
   example: string;
+  /** Tells an agent what to put in the query. */
+  orderHelp: string;
   /** How many purchases the suggested `npm run buy` makes. */
   agentCount: number;
   /** Arguments for `npm run simulate` (count first), or null if this test needs a real payment. */
@@ -67,6 +69,7 @@ const rail: Shop = {
   accent: "#2563eb",
   buyPath: "/rail/book",
   example: "from=CSMT&to=PUNE",
+  orderHelp: "from and to: station codes (CSMT, PUNE, NGP, BCT, NDLS). date: optional, YYYY-MM-DD.",
   agentCount: 1,
   simArgs: "1",
   deliver(query) {
@@ -100,6 +103,7 @@ const news: Shop = {
   accent: "#b45309",
   buyPath: "/news/article",
   example: "id=1",
+  orderHelp: `id: article number, 1 to ${ARTICLES.length}.`,
   agentCount: 3,
   simArgs: "3",
   check: (query) =>
@@ -126,6 +130,7 @@ const weather: Shop = {
   accent: "#0f766e",
   buyPath: "/weather/now",
   example: "city=Mumbai",
+  orderHelp: "city: any Indian city.",
   agentCount: 8,
   simArgs: "8",
   deliver(query) {
@@ -164,6 +169,7 @@ const food: Shop = {
   accent: "#c2410c",
   buyPath: "/food/order",
   example: "items=chai",
+  orderHelp: `items: comma-separated menu items (${Object.keys(MENU).join(", ")}).`,
   agentCount: 1,
   simArgs: "1 --inr 20",
   check(query) {
@@ -202,6 +208,7 @@ const concert: Shop = {
   accent: "#7c3aed",
   buyPath: "/concert/ticket",
   example: "",
+  orderHelp: "No order details needed.",
   agentCount: STOCK + 1,
   simArgs: null,
   deliver() {

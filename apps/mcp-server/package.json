@@ -1,0 +1,27 @@
+{
+  "name": "sangam-mcp",
+  "version": "0.1.0",
+  "description": "Let any AI assistant pay Sangam merchants in USDC over x402 (Hedera testnet).",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "sangam-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@x402/core": "^2.28.0",
+    "@x402/fetch": "^2.28.0",
+    "@x402/hedera": "^2.28.0",
+    "zod": "^3.25.76"
+  }
+}

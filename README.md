@@ -397,6 +397,7 @@ Everything else in `.env.example` has a working default.
 | `apps/settlement-agent` | Pipeline: `confirm.ts` → `decide.ts` (0G) → `payout.ts` → `receipt.ts` (HCS) |
 | `apps/customer-agent` | Buyer CLI with a session budget |
 | `apps/shops` | Five test merchants on one server, each testing a different part of Sangam |
+| `apps/mcp-server` | `sangam-mcp`: lets any AI assistant set up a wallet and buy from the shops. See its README |
 | `apps/dashboard` | Vite page; dev proxy in `vite.config.ts` |
 | `scripts/` | One-off setup scripts and the simulator |
 | `data/merchants.local.json` | Merchant records used while `ENS_OFFLINE=true` |
