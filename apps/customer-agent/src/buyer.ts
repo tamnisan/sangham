@@ -13,10 +13,11 @@ const { values: args } = parseArgs({
     from: { type: "string", default: "CSMT" },
     to: { type: "string", default: "PUNE" },
     date: { type: "string", default: new Date().toISOString().slice(0, 10) },
+    query: { type: "string" }, // extra query params for the test shops, e.g. "items=chai,samosa"
   },
 });
 if (!args.merchant) {
-  console.error("usage: npm run buy -- --merchant tickets.sangam.eth [--count 3] [--from CSMT --to PUNE]");
+  console.error('usage: npm run buy -- --merchant tickets.sangam.eth [--count 3] [--from CSMT --to PUNE] [--query "id=2"]');
   process.exit(1);
 }
 
@@ -44,6 +45,7 @@ const url = new URL(merchant.endpoint);
 url.searchParams.set("from", args.from);
 url.searchParams.set("to", args.to);
 url.searchParams.set("date", args.date);
+for (const [key, value] of new URLSearchParams(args.query ?? "")) url.searchParams.set(key, value);
 
 for (let i = 1; i <= Number(args.count); i++) {
   // Ask the price first (an unpaid request returns 402 with the requirements).
@@ -63,14 +65,18 @@ for (let i = 1; i <= Number(args.count); i++) {
 
   const res = await payingFetch(url);
   if (!res.ok) {
-    console.error(`[agent] purchase ${i} failed with ${res.status}: ${await res.text()}`);
+    // x402 settles only when the merchant delivers, so a failed purchase normally has no PAYMENT-RESPONSE.
+    const charged = res.headers.get("PAYMENT-RESPONSE") ? "" : " (no payment settled, so not charged)";
+    console.error(`[agent] purchase ${i} failed with ${res.status}${charged}: ${await res.text()}`);
     process.exit(1);
   }
-  const ticket = await res.json();
+  const goods = await res.json();
   const settle = http.getPaymentSettleResponse((name) => res.headers.get(name));
   spentAtomic += price;
 
-  console.log(`[agent] #${i} paid ${formatUsdc(price)} USDC · PNR ${ticket.pnr} · ${ticket.train.name} · ${ticket.coach}/${ticket.seat}`);
+  // The test shops send a one-line summary; merchant-api sends a rail ticket.
+  const what = goods.summary ?? `PNR ${goods.pnr} · ${goods.train.name} · ${goods.coach}/${goods.seat}`;
+  console.log(`[agent] #${i} paid ${formatUsdc(price)} USDC · ${what}`);
   console.log(`        ${hashscanTxUrl(settle.transaction)}`);
 }
 

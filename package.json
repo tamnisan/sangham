@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "merchant": "npm --workspace @sangam/merchant-api start",
+    "shops": "npm --workspace @sangam/shops start",
     "settlement": "npm --workspace @sangam/settlement-agent start",
     "settlement:sim": "npm --workspace @sangam/settlement-agent run start:sim",
     "buy": "npm --workspace @sangam/customer-agent start --",

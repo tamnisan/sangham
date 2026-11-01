@@ -320,11 +320,12 @@ You have two options.
 3. Put the project inside the Linux file system (e.g. `~/sangam`), not under `/mnt/c/…`, which is much slower.
 4. Follow this guide as if you were on Linux. Browsers on Windows can open `http://localhost:5173` directly.
 
-**Option B: native PowerShell.** Every `npm run …` command works unchanged. These are the only differences:
+**Option B: native PowerShell.** `npm run …` commands work, except that ones with `--` need `npm.cmd` (first row). These are the only differences:
 
 | In this guide | In PowerShell |
 |---|---|
 | `cp .env.example .env` | `Copy-Item .env.example .env` |
+| `npm run buy -- --merchant …` (anything with `--`) | `npm.cmd run buy -- --merchant …` (plain `npm` in PowerShell drops the `--`) |
 | `curl …` | `curl.exe …` (plain `curl` is a different command in Windows PowerShell) |
 | `export PATH=…` | not needed; the Node installer sets PATH |
 | `lsof -nP -iTCP:3000 -sTCP:LISTEN` | `netstat -ano \| findstr :3000`, then `taskkill /PID <pid> /F` |
@@ -351,6 +352,7 @@ If Windows Firewall asks about Node.js when a server starts, **Allow** on privat
 | `npm run settlement:sim` | Start settlement-agent in simulation mode (enables simulate buttons + `npm run simulate`) |
 | `npm run gen-keys` | Print a new shared secret and EVM key |
 | `npm run merchant` | Start merchant-api (:3000) |
+| `npm run shops` | Start the five test shops (:3002). See `docs/TEST-SHOPS.md` |
 | `npm run dashboard` | Start the dashboard (:5173) |
 | `npm run buy -- --merchant <name> [--count N] [--from CSMT --to PUNE]` | Run the buyer agent |
 | `npm run simulate -- [N] [--short]` | Send fake notices (needs `npm run settlement:sim` running) |
@@ -394,6 +396,7 @@ Everything else in `.env.example` has a working default.
 | `apps/merchant-api` | Express + `@x402/express` paywall on `GET /book` |
 | `apps/settlement-agent` | Pipeline: `confirm.ts` → `decide.ts` (0G) → `payout.ts` → `receipt.ts` (HCS) |
 | `apps/customer-agent` | Buyer CLI with a session budget |
+| `apps/shops` | Five test merchants on one server, each testing a different part of Sangam |
 | `apps/dashboard` | Vite page; dev proxy in `vite.config.ts` |
 | `scripts/` | One-off setup scripts and the simulator |
 | `data/merchants.local.json` | Merchant records used while `ENS_OFFLINE=true` |
