@@ -1,0 +1,37 @@
+{
+  "rail.sangam.eth": {
+    "endpoint": "https://sangam-shops.onrender.com/rail/book",
+    "hederaPayTo": "0.0.11227653",
+    "network": "hedera:testnet",
+    "priceInrPaise": "4900",
+    "upiHandle": "rail@razorpay"
+  },
+  "news.sangam.eth": {
+    "endpoint": "https://sangam-shops.onrender.com/news/article",
+    "hederaPayTo": "0.0.11227653",
+    "network": "hedera:testnet",
+    "priceInrPaise": "200",
+    "upiHandle": "news@razorpay"
+  },
+  "weather.sangam.eth": {
+    "endpoint": "https://sangam-shops.onrender.com/weather/now",
+    "hederaPayTo": "0.0.11227653",
+    "network": "hedera:testnet",
+    "priceInrPaise": "100",
+    "upiHandle": "weather@razorpay"
+  },
+  "food.sangam.eth": {
+    "endpoint": "https://sangam-shops.onrender.com/food/order",
+    "hederaPayTo": "0.0.11227653",
+    "network": "hedera:testnet",
+    "priceInrPaise": "6000",
+    "upiHandle": "food@razorpay"
+  },
+  "concert.sangam.eth": {
+    "endpoint": "https://sangam-shops.onrender.com/concert/ticket",
+    "hederaPayTo": "0.0.11227653",
+    "network": "hedera:testnet",
+    "priceInrPaise": "7500",
+    "upiHandle": "concert@razorpay"
+  }
+}

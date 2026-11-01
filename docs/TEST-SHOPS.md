@@ -61,7 +61,7 @@ The concert run should print 3 tickets, then `purchase 4 failed with 410 (no pay
 
 ## 3. Put them online
 
-**Server (Render Blueprint, free plan).** `render.yaml` creates three services with every mock on: `sangam-settlement` (simulation mode), `sangam-shops` and `sangam-dashboard`. In Render, choose **New → Blueprint**, pick this repo and branch, and fill in the three URLs it asks for:
+**Server (Render Blueprint, free plan).** `render.yaml` creates three services: `sangam-settlement` (real Hedera testnet checks and HCS receipts; 0G, ENS and UPI mocked), `sangam-shops` and `sangam-dashboard`. They read merchants from `data/merchants.render.json`, which has the public shop URLs and the treasury `payTo`. In Render, choose **New → Blueprint**, pick this repo and branch, and fill in the three URLs it asks for:
 
 | Variable | Service | Value |
 |---|---|---|
@@ -73,14 +73,16 @@ If Render adds a suffix to a name because it's taken (like `sangam-shops-x1y2.on
 
 Free services sleep after about 15 minutes idle, and the first request after that takes about a minute. The settlement agent's payment list also resets when it sleeps.
 
-To run the simulator on your PC against the deployed agent, copy `SETTLEMENT_SHARED_SECRET` from the `sangam-shared` environment group in Render, then in PowerShell:
+Then set the one secret by hand: **sangam-settlement → Environment → `OPERATOR_PRIVATE_KEY`** (the treasury's private key, used to write HCS receipts), and save. Never put it in `render.yaml`.
 
-```powershell
-$env:SETTLEMENT_AGENT_URL="https://sangam-settlement.onrender.com"; $env:SETTLEMENT_SHARED_SECRET="<copied value>"
-npm.cmd run simulate -- 1 --merchant rail.sangam.eth
+To buy from the deployed shops, point the agent on your PC at the Render merchant file:
+
+```bash
+MERCHANTS_FILE=data/merchants.render.json npm.cmd run buy -- --merchant rail.sangam.eth   # Git Bash
+$env:MERCHANTS_FILE="data/merchants.render.json"; npm.cmd run buy -- --merchant rail.sangam.eth   # PowerShell
 ```
 
-For real payments, the shops need your Hedera treasury account and an ENS record or merchant file pointing at the public URL. Until then, each shop page's "Paid link" shows the `localhost` address from `data/merchants.local.json`.
+Watch it on https://sangam-dashboard.onrender.com. The simulate buttons and `npm run simulate` only work against a settlement agent started with `npm run settlement:sim`.
 
 **ENS names (Sepolia, free).** On https://sepolia.app.ens.domains, register one name, for example `yourname.eth`, then create five subnames under it: `rail`, `news`, `weather`, `food`, `concert`. Publish each shop's records:
 

@@ -3,7 +3,7 @@ import path from "node:path";
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
 import { normalize } from "viem/ens";
-import { REPO_ROOT, flag } from "./config.ts";
+import { REPO_ROOT, envOr, flag } from "./config.ts";
 import type { MerchantRecord } from "./types.ts";
 
 /** ENS text-record keys a Sangam merchant publishes. */
@@ -22,7 +22,8 @@ const cache = new Map<string, { record: MerchantRecord; at: number }>();
  * Look a merchant up by ENS name. This is the only place any app learns a
  * merchant's URL, Hedera account or UPI handle.
  *
- * ENS_OFFLINE=true reads data/merchants.local.json instead (dev only).
+ * ENS_OFFLINE=true reads data/merchants.local.json instead (dev only), or the
+ * file named by MERCHANTS_FILE, e.g. data/merchants.render.json for the deployed shops.
  */
 export async function resolveMerchant(ensName: string): Promise<MerchantRecord> {
   const hit = cache.get(ensName);
@@ -55,10 +56,10 @@ async function readEnsMerchant(ensName: string): Promise<MerchantRecord> {
 }
 
 function readLocalMerchant(ensName: string): MerchantRecord {
-  const file = path.join(REPO_ROOT, "data/merchants.local.json");
-  const all = JSON.parse(readFileSync(file, "utf8")) as Record<string, Record<keyof typeof MERCHANT_TEXT_KEYS, string>>;
+  const name = envOr("MERCHANTS_FILE", "data/merchants.local.json");
+  const all = JSON.parse(readFileSync(path.join(REPO_ROOT, name), "utf8")) as Record<string, Record<keyof typeof MERCHANT_TEXT_KEYS, string>>;
   const values = all[ensName];
-  if (!values) throw new Error(`${ensName} not found in data/merchants.local.json`);
+  if (!values) throw new Error(`${ensName} not found in ${name}`);
   return toRecord(ensName, values);
 }
 

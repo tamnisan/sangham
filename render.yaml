@@ -1,8 +1,9 @@
 # Render Blueprint: the five test shops, the settlement agent and the dashboard.
 # Render → New → Blueprint → pick this repo and branch. See docs/TEST-SHOPS.md.
 #
-# Runs with every mock on (no Hedera, 0G, ENS or RazorpayX keys needed):
-# the settlement agent is in simulation mode and trusts payment notices.
+# Real Hedera testnet payments: the settlement agent checks every payment on the
+# Mirror Node and writes HCS receipts. 0G, ENS and RazorpayX stay mocked.
+# Set OPERATOR_PRIVATE_KEY by hand in Render (sangam-settlement → Environment).
 
 envVarGroups:
   - name: sangam-shared
@@ -11,8 +12,10 @@ envVarGroups:
         value: "22"
       - key: SETTLEMENT_SHARED_SECRET # same random value for the shops and the agent
         generateValue: true
-      - key: ENS_OFFLINE # read merchants from data/merchants.local.json
+      - key: ENS_OFFLINE # read merchants from MERCHANTS_FILE instead of ENS
         value: "true"
+      - key: MERCHANTS_FILE # the shops' public URLs and the treasury payTo
+        value: data/merchants.render.json
 
 services:
   - type: web
@@ -20,9 +23,17 @@ services:
     runtime: node
     plan: free
     buildCommand: npm ci
-    startCommand: npm run settlement:sim
+    startCommand: npm run settlement
     envVars:
       - fromGroup: sangam-shared
+      - key: SKIP_CHAIN_VERIFY # check every payment on the Hedera Mirror Node
+        value: "false"
+      - key: OPERATOR_ACCOUNT_ID # pays for HCS receipts (the treasury account)
+        value: "0.0.11227653"
+      - key: OPERATOR_PRIVATE_KEY # secret: paste it in Render, never commit it
+        sync: false
+      - key: HCS_TOPIC_ID # receipts topic
+        value: "0.0.11262562"
       - key: OG_MOCK
         value: "true"
       - key: PSP_MODE
