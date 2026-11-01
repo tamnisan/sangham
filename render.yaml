@@ -1,0 +1,58 @@
+# Render Blueprint: the five test shops, the settlement agent and the dashboard.
+# Render → New → Blueprint → pick this repo and branch. See docs/TEST-SHOPS.md.
+#
+# Runs with every mock on (no Hedera, 0G, ENS or RazorpayX keys needed):
+# the settlement agent is in simulation mode and trusts payment notices.
+
+envVarGroups:
+  - name: sangam-shared
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SETTLEMENT_SHARED_SECRET # same random value for the shops and the agent
+        generateValue: true
+      - key: ENS_OFFLINE # read merchants from data/merchants.local.json
+        value: "true"
+
+services:
+  - type: web
+    name: sangam-settlement
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run settlement:sim
+    envVars:
+      - fromGroup: sangam-shared
+      - key: OG_MOCK
+        value: "true"
+      - key: PSP_MODE
+        value: mock
+      - key: DEMO_STEP_DELAY_MS
+        value: "800"
+      - key: MERCHANT_ENS_NAME # the shop the dashboard's simulate buttons pay
+        value: rail.sangam.eth
+
+  - type: web
+    name: sangam-shops
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run shops
+    healthCheckPath: /health
+    envVars:
+      - fromGroup: sangam-shared
+      - key: SETTLEMENT_AGENT_URL # https://<sangam-settlement URL>
+        sync: false
+
+  - type: web
+    name: sangam-dashboard
+    runtime: static
+    buildCommand: npm ci && npm --workspace @sangam/dashboard run build
+    staticPublishPath: apps/dashboard/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_SETTLEMENT_URL # https://<sangam-settlement URL>
+        sync: false
+      - key: VITE_MERCHANT_URL # https://<sangam-shops URL>/rail
+        sync: false
