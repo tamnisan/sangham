@@ -16,9 +16,15 @@ const sharedSecret = env("SETTLEMENT_SHARED_SECRET");
 const app = express();
 app.use(express.json());
 
-// The dashboard runs on another port.
-app.use((_req, res, next) => {
+// The dashboard runs on another port (another origin once deployed). Its JSON
+// POSTs make the browser send a CORS preflight first, so answer that too.
+app.use((req, res, next) => {
   res.setHeader("access-control-allow-origin", envOr("DASHBOARD_ORIGIN", "*"));
+  res.setHeader("access-control-allow-headers", "content-type");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
   next();
 });
 
